@@ -1,14 +1,15 @@
-ASM_FILES = $(wildcard *.asm)
-OBJ_FILES = $(ASM_FILES:.asm=.o)
+ASM_FILES = $(wildcard *.s */*.s)
+OBJ_FILES = $(ASM_FILES:.s=.o)
 LD = i686-elf-ld
 
-%.o: %.asm
-	nasm -felf32 $< -o $@
+%.o: %.s
+	i686-elf-as $< -o $@
 
 mukeos.bin: $(OBJ_FILES)
 	$(LD) -T linker.ld -o $@ -O2 -nostdlib $^
 
 mukeos.iso: mukeos.bin
+	rm -rf isodir
 	mkdir -p isodir/boot/grub
 	cp mukeos.bin isodir/boot/mukeos.bin
 	cp grub.cfg isodir/boot/grub/grub.cfg
@@ -21,5 +22,5 @@ clean:
 	rm -rf $(OBJ_FILES) mukeos.bin mukeos.iso isodir
 
 debug: mukeos.iso
-	qemu-system-i386 -s -S -cdrom $< &
-	gdb -ex "target remote localhost:1234" -ex "layout src" -ex "layout regs" -ex "break *0x7c00" -ex "continue"
+	qemu-system-i386 -cdrom $< -s -S &
+	i686-elf-gdb -ex "target remote localhost:1234" -ex "symbol-file mukeos.bin"

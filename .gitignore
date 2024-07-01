@@ -1,5 +1,4 @@
-/boot.o
-/isodir
-/kernel.o
-/mukeos.bin
-/mukeos.iso
+*.o
+*.bin
+*.iso
+isodir/
