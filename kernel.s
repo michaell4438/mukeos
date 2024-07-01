@@ -1,7 +1,9 @@
 .global kernel_main
 
-.set VGABUFFER, 0xC03FF000
+.extern print_char
 
 kernel_main:
-    movl $0x0F41, VGABUFFER
+    mov $0x0F, %ebx
+    mov $'H', %eax
+    call print_char
     ret
