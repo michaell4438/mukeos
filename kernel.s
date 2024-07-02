@@ -2,8 +2,15 @@
 
 .extern print_char
 
+.section .rodata
+msg:
+    .ascii "Welcome to MukeOS"
+    .byte 0
+
+.section .text
 kernel_main:
+    mov $msg, %eax
     mov $0x0F, %ebx
-    mov $'H', %eax
-    call print_char
+    call print_string
+
     ret
