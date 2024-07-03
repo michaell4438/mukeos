@@ -1,6 +1,6 @@
 .global kernel_main
 
-.extern print_char
+.include "macros/colors.S"
 
 .section .rodata
 msg:
@@ -10,10 +10,10 @@ msg:
 
 .section .text
 kernel_main:
-    mov $msg, %eax
-    mov $0x0F, %ebx
-    call print_string
+    call disable_cursor
 
-    call print_int
+    mov $msg, %eax
+    movl $(VGA_BLACK_BG | VGA_LIGHT_GREY_FG), %ebx
+    call print_string
 
     ret

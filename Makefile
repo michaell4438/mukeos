@@ -1,8 +1,8 @@
-ASM_FILES = $(wildcard *.s */*.s)
-OBJ_FILES = $(ASM_FILES:.s=.o)
+ASM_FILES = $(filter-out macros/*, $(wildcard *.S */*.S))
+OBJ_FILES = $(ASM_FILES:.S=.o)
 LD = i686-elf-ld
 
-%.o: %.s
+%.o: %.S
 	i686-elf-as $< -o $@
 
 mukeos.bin: $(OBJ_FILES)
