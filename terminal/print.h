@@ -16,6 +16,7 @@ void set_terminal_position(uint8_t x, uint8_t y);
 int get_terminal_x();
 int get_terminal_y();
 void print(char* str);
+void print_colored(char* str, uint16_t color);
 
 #define VGA_BLACK_BG 0x00
 #define VGA_BLUE_BG 0x10

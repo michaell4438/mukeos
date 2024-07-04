@@ -56,6 +56,7 @@ void print_int(int num, uint16_t color) {
 }
 
 void print_hex(uint32_t num, uint16_t color) {
+    print_string("0x", color);
     char buffer[32];
     int i = 0;
     while (num > 0) {
@@ -113,7 +114,11 @@ int get_terminal_y() {
 }
 
 void print(char* str) {
-    print_string(str, VGA_LIGHT_GREY_FG | VGA_BLACK_BG);
+    print_colored(str, VGA_LIGHT_GREY_FG);
+}
+
+void print_colored(char* str, uint16_t color) {
+    print_string(str, color);
     print_newline();
 }
 

@@ -1,11 +1,15 @@
 ASM_FILES = $(filter-out macros/*, $(wildcard *.S */*.S))
 C_FILES = $(wildcard *.c */*.c)
-OBJ_FILES = $(ASM_FILES:.S=.o) $(C_FILES:.c=.o) 
+NASM_FILES = $(wildcard *.asm */*.asm)
+OBJ_FILES = $(ASM_FILES:.S=.o) $(C_FILES:.c=.o) $(NASM_FILES:.asm=.o)
 LD = i686-elf-ld
 C_FLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
 %.o: %.S
 	i686-elf-as $< -o $@
+
+%.o: %.asm
+	nasm -f elf32 $< -o $@
 
 %.o: %.c
 	i686-elf-gcc -c $< -o $@ $(C_FLAGS)
