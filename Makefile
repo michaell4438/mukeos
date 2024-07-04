@@ -1,9 +1,14 @@
 ASM_FILES = $(filter-out macros/*, $(wildcard *.S */*.S))
-OBJ_FILES = $(ASM_FILES:.S=.o)
+C_FILES = $(wildcard *.c */*.c)
+OBJ_FILES = $(ASM_FILES:.S=.o) $(C_FILES:.c=.o) 
 LD = i686-elf-ld
+C_FLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
 %.o: %.S
 	i686-elf-as $< -o $@
+
+%.o: %.c
+	i686-elf-gcc -c $< -o $@ $(C_FLAGS)
 
 mukeos.bin: $(OBJ_FILES)
 	$(LD) -T linker.ld -o $@ -O2 -nostdlib $^

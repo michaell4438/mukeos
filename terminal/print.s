@@ -10,6 +10,7 @@
 .global print_newline
 .global disable_cursor
 .global clear_screen
+.global get_current_line
 
 .section .rodata
 newline:
