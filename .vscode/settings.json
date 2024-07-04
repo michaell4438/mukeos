@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.s": "gas",
-        "print.C": "cpp"
+        "print.C": "cpp",
+        "io.C": "cpp"
     }
 }

@@ -4,15 +4,18 @@
 #define PRINT_H
 #include <stdint.h>
 
-extern void print_char(char c, uint16_t color);
-extern void print_string(char* str, uint16_t color);
-extern void print_int(int num, uint16_t color);
-extern void print_hex(uint32_t num, uint16_t color);
-extern void print_newline();
-extern void clear_screen();
-extern void disable_cursor();
-extern void set_terminal_position(uint8_t x, uint8_t y);
-extern uint8_t get_current_line();
+void print_char(char c, uint16_t color);
+void print_string(char* str, uint16_t color);
+void print_int(int num, uint16_t color);
+void print_hex(uint32_t num, uint16_t color);
+void print_newline();
+void clear_screen();
+void disable_cursor();
+void enable_cursor();
+void set_terminal_position(uint8_t x, uint8_t y);
+int get_terminal_x();
+int get_terminal_y();
+void print(char* str);
 
 #define VGA_BLACK_BG 0x00
 #define VGA_BLUE_BG 0x10

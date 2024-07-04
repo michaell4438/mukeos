@@ -64,7 +64,6 @@ _start:
 	jmp *%ecx
 
 .section .text
-
 4:
 	movl $0, boot_page_directory + 0
 
