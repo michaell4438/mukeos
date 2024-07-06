@@ -17,6 +17,7 @@ void kernel_main(void) {
     print("Done");
     print_string("Loading IDT...", VGA_LIGHT_GREY_FG);
     idt_init();
+    enable_nmi();
     print("Done");
 
     // Intentionally cause a divide by zero exception to test the IDT

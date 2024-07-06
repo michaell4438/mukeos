@@ -9,4 +9,7 @@ void idt_init(void);
 __attribute__((noreturn))
 void exception_handler(void);
 
+void enable_nmi(void);
+void disable_nmi(void);
+
 #endif

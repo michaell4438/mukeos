@@ -114,12 +114,28 @@ int get_terminal_y() {
 }
 
 void print(char* str) {
-    print_colored(str, VGA_LIGHT_GREY_FG);
+    print_colored(str, terminal_default_color);
 }
 
 void print_colored(char* str, uint16_t color) {
     print_string(str, color);
     print_newline();
+}
+
+void print_char_at(char c, uint16_t color, uint8_t x, uint8_t y) {
+    uint8_t old_x = terminal_x;
+    uint8_t old_y = terminal_y;
+    set_terminal_position(x, y);
+    print_char(c, color);
+    set_terminal_position(old_x, old_y);
+}
+
+void print_at(char* str, uint16_t color, uint8_t x, uint8_t y) {
+    uint8_t old_x = terminal_x;
+    uint8_t old_y = terminal_y;
+    set_terminal_position(x, y);
+    print_colored(str, color);
+    set_terminal_position(old_x, old_y);
 }
 
 #endif

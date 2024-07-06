@@ -5,6 +5,13 @@
 #include "../terminal/print.h"
 #include "pic.h"    
 
+// Exceptions are vectors 0-31
+// IRQs are vectors 32-47
+// System calls are vectors 48-255
+
+// Exceptions will halt the CPU
+// IRQs and system calls will send an EOI to the PIC, call the appropriate handler, and return
+
 #define IDT_MAX_DESCRIPTORS 256
 
 typedef struct {
@@ -51,6 +58,25 @@ static char* vector_messages[] = {
     "Control protection exception"
 };
 
+static char* irq_messages[] = {
+    "Timer",
+    "Keyboard",
+    "Slave PIC",
+    "COM2",
+    "COM1",
+    "LPT2",
+    "Floppy",
+    "LPT1",
+    "CMOS",
+    "Free",
+    "Free",
+    "Free",
+    "PS2 Mouse",
+    "FPU",
+    "Primary ATA",
+    "Secondary ATA"
+};
+
 extern void* isr_stub_table[];
 
 void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
@@ -93,7 +119,30 @@ void exception_handler() {
         print_newline();
     }
 
-    while (1);
+    // If the interrupt is not an exception, send an EOI to the PIC and return
+    // Later we need to implement handling for IRQs and system calls
+    if (vector >= 32) {
+        if (vector >= 40) {
+            outb(0xA0, 0x20);
+        }
+        outb(0x20, 0x20);
+        return;
+    }
+
+    // If the interrupt is an exception, halt the CPU
+    while (1) {
+        __asm__ volatile ("hlt");
+    }
+}
+
+void enable_nmi() {
+    outb(0x70, inb(0x70) & 0x7F);
+    inb(0x71);
+}
+
+void disable_nmi() {
+    outb(0x70, inb(0x70) | 0x80);
+    inb(0x71);
 }
 
 #endif

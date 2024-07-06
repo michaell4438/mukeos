@@ -4,6 +4,7 @@
         "print.C": "cpp",
         "io.C": "cpp",
         "print.h": "c",
-        "io.h": "c"
+        "io.h": "c",
+        "stdint.h": "c"
     }
 }

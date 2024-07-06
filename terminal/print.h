@@ -17,6 +17,8 @@ int get_terminal_x();
 int get_terminal_y();
 void print(char* str);
 void print_colored(char* str, uint16_t color);
+void print_char_at(char c, uint16_t color, uint8_t x, uint8_t y);
+void print_at(char* str, uint16_t color, uint8_t x, uint8_t y);
 
 #define VGA_BLACK_BG 0x00
 #define VGA_BLUE_BG 0x10
@@ -51,5 +53,7 @@ void print_colored(char* str, uint16_t color);
 #define VGA_LIGHT_MAGENTA_FG 0x0D
 #define VGA_LIGHT_BROWN_FG 0x0E
 #define VGA_WHITE_FG 0x0F
+
+static uint8_t terminal_default_color = VGA_LIGHT_GREY_FG | VGA_BLACK_BG;
 
 #endif
