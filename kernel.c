@@ -2,9 +2,9 @@
 #include "terminal/print.h"
 #include "interrupts/idt.h"
 #include "gdt/gdt.h"
+#include "multiboot/multiboot.h"
 
 // must be named "kernel_main"
-
 void kernel_main(void) {
     disable_cursor();
     clear_screen();
@@ -14,15 +14,12 @@ void kernel_main(void) {
     print_newline();
     print_string("Loading GDT...", VGA_LIGHT_GREY_FG);
     gdt_init();
-    print("Done");
+    print_colored("Done", VGA_GREEN_FG);
     print_string("Loading IDT...", VGA_LIGHT_GREY_FG);
     idt_init();
     enable_nmi();
-    print("Done");
-
-    // Intentionally cause a divide by zero exception to test the IDT
-    int a = 1;
-    int b = 0;
-    int c = a / b;
-    print_int(c, VGA_WHITE_FG);
+    print_colored("Done", VGA_GREEN_FG);
+    print_string("Loading multiboot info...", VGA_LIGHT_GREY_FG);
+    init_multiboot_info();
+    print_colored("Done", VGA_GREEN_FG);
 }

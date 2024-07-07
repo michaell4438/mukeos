@@ -5,6 +5,7 @@
         "io.C": "cpp",
         "print.h": "c",
         "io.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "page_manager.h": "c"
     }
 }

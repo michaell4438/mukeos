@@ -23,10 +23,33 @@ boot_page_directory:
 boot_page_table1:
 	.skip 4096
 
+.section .mbootinfo
+multiboot_info:
+	.skip 512
+multiboot_mmap:
+	.skip 8192
+
 .section .multiboot.text, "a"
 .global _start
 .type _start, @function
 _start:
+	# copy the multiboot info to a known location
+	movl $multiboot_info, %edi
+	movl %esp, %esi
+	movl $512, %ecx
+	rep movsb
+
+	# copy the memory map to multiboot_mmap
+	# find the memory map (multiboot_info + 44)
+	movl multiboot_info, %esi
+	addl $44, %esi
+	movl %esi, %edi
+	movl $multiboot_mmap, %esi
+	movl 8(%esi), %ecx
+	shr $4, %ecx # size of the memory map
+	rep movsb
+
+page_init:
 	movl $(boot_page_table1 - 0xC0000000), %edi
 	movl $0, %esi
 	movl $1023, %ecx
@@ -71,7 +94,7 @@ _start:
 	movl %ecx, %cr3
 
 	mov $stack_top, %esp
-
+	
 	call kernel_main
 
 	cli

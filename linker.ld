@@ -15,6 +15,7 @@ SECTIONS
        .multiboot.text : {
            *(.multiboot.text)
        }
+	_bootloader_end = .;
 
 	. += 0xC0000000;
 	/* Add a symbol that indicates the start address of the kernel. */
@@ -35,6 +36,11 @@ SECTIONS
 		*(COMMON)
 		*(.bss)
 		*(.bootstrap_stack)
+	}
+	.mbootinfo ALIGN (4K) : AT (ADDR (.mbootinfo) - 0xC0000000)
+	{
+		_mbootinfo = .;
+		*(.mbootinfo)
 	}
 	/* Add a symbol that indicates the end address of the kernel. */
 	_kernel_end = .;
