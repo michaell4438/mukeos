@@ -19,6 +19,7 @@ void print(char* str);
 void print_colored(char* str, uint16_t color);
 void print_char_at(char c, uint16_t color, uint8_t x, uint8_t y);
 void print_at(char* str, uint16_t color, uint8_t x, uint8_t y);
+void printf(char* format, ...);
 
 #define VGA_BLACK_BG 0x00
 #define VGA_BLUE_BG 0x10

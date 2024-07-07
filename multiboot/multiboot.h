@@ -56,6 +56,6 @@ struct multiboot_mmap_entry {
     uint32_t type;
 } __attribute__((packed));
 
-void init_multiboot_info();
+void init_multiboot_info(struct multiboot_info* mbi);
 
 #endif

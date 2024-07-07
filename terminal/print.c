@@ -7,7 +7,7 @@
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 
-uint16_t* terminal_buffer = (uint16_t*)0xC03FF000;
+uint16_t* terminal_buffer = (uint16_t*)0xB8000;
 uint8_t terminal_x = 0;
 uint8_t terminal_y = 0;
 

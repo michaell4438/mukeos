@@ -4,13 +4,17 @@
 #include "multiboot.h"
 #include "../terminal/print.h"
 
-extern uint32_t _mbootinfo;     // The address of the multiboot info structure
-struct multiboot_info* mb_info = (struct multiboot_info*)&_mbootinfo;
-struct multiboot_mmap_entry* mmap = (struct multiboot_mmap_entry*)&_mbootinfo + 512;
+struct multiboot_info* multiboot_info;
+struct multiboot_mmap_entry* mmap_entries;
+uint8_t mmap_entry_count = 0;
 
-void init_multiboot_info() {
-    print_string("Memory map address: ", terminal_default_color);
-    print_hex(mb_info->mmap_addr, terminal_default_color);
+void init_multiboot_info(struct multiboot_info* mbi) {
+    multiboot_info = mbi;
+    mmap_entries = (struct multiboot_mmap_entry*) mbi->mmap_addr;
+    for (uint32_t i = 0; i < mbi->mmap_length; i+=sizeof(struct multiboot_mmap_entry)) {
+        struct multiboot_mmap_entry* entry = &mmap_entries[i];
+        mmap_entry_count++;
+    }
 }
 
 #endif

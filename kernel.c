@@ -5,7 +5,9 @@
 #include "multiboot/multiboot.h"
 
 // must be named "kernel_main"
-void kernel_main(void) {
+// use cdecl calling convention
+__attribute__((cdecl))
+void kernel_main(struct multiboot_info* mbi) {
     disable_cursor();
     clear_screen();
 
@@ -20,6 +22,6 @@ void kernel_main(void) {
     enable_nmi();
     print_colored("Done", VGA_GREEN_FG);
     print_string("Loading multiboot info...", VGA_LIGHT_GREY_FG);
-    init_multiboot_info();
+    init_multiboot_info(mbi);
     print_colored("Done", VGA_GREEN_FG);
 }

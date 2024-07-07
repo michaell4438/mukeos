@@ -31,5 +31,5 @@ clean:
 	rm -rf $(OBJ_FILES) mukeos.bin mukeos.iso isodir
 
 debug: mukeos.iso
-	qemu-system-i386 -cdrom $< -s -S &
+	qemu-system-i386 -m 512M -cdrom $< -s -S &
 	i686-elf-gdb -ex "target remote localhost:1234" -ex "symbol-file mukeos.bin"
