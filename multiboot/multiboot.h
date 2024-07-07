@@ -58,4 +58,7 @@ struct multiboot_mmap_entry {
 
 void init_multiboot_info(struct multiboot_info* mbi);
 
+uint32_t get_mmap_entry_count();
+struct multiboot_mmap_entry* get_mmap_entries();
+
 #endif

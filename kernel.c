@@ -3,6 +3,7 @@
 #include "interrupts/idt.h"
 #include "gdt/gdt.h"
 #include "multiboot/multiboot.h"
+#include "memory/kmalloc.h"
 
 // must be named "kernel_main"
 // use cdecl calling convention
@@ -23,5 +24,8 @@ void kernel_main(struct multiboot_info* mbi) {
     print_colored("Done", VGA_GREEN_FG);
     print_string("Loading multiboot info...", VGA_LIGHT_GREY_FG);
     init_multiboot_info(mbi);
+    print_colored("Done", VGA_GREEN_FG);
+    print_string("Initializing memory manager...", VGA_LIGHT_GREY_FG);
+    kmalloc_init(get_mmap_entries(), get_mmap_entry_count());
     print_colored("Done", VGA_GREEN_FG);
 }

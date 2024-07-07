@@ -6,6 +6,7 @@
         "print.h": "c",
         "io.h": "c",
         "stdint.h": "c",
-        "page_manager.h": "c"
+        "page_manager.h": "c",
+        "multiboot.h": "c"
     }
 }

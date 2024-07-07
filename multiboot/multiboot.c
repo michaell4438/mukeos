@@ -6,7 +6,7 @@
 
 struct multiboot_info* multiboot_info;
 struct multiboot_mmap_entry* mmap_entries;
-uint8_t mmap_entry_count = 0;
+uint32_t mmap_entry_count = 0;
 
 void init_multiboot_info(struct multiboot_info* mbi) {
     multiboot_info = mbi;
@@ -15,6 +15,14 @@ void init_multiboot_info(struct multiboot_info* mbi) {
         struct multiboot_mmap_entry* entry = &mmap_entries[i];
         mmap_entry_count++;
     }
+}
+
+uint32_t get_mmap_entry_count() {
+    return mmap_entry_count;
+}
+
+struct multiboot_mmap_entry* get_mmap_entries() {
+    return mmap_entries;
 }
 
 #endif
