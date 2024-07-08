@@ -1,41 +1,38 @@
-ENTRY (_start)
+OUTPUT_FORMAT(elf64-x86-64)
+OUTPUT_ARCH(i386:x86-64)
+
+ENTRY(_start)
 
 SECTIONS
 {
-        . = 0x00100000;
-	/* The kernel will live at 3GB + 1MB in the virtual address space, */
-	/* which will be mapped to 1MB in the physical address space. */
-	/* Note that we page-align the sections. */
+    . = 0xffffffff80000000 + SIZEOF_HEADERS;
 
-	_kernel_start = .;
-        .multiboot.data : {
-            *(.multiboot.data)
-        }
+    .rodata ALIGN(CONSTANT(MAXPAGESIZE)) : {
+        *(.rodata .rodata.*)
+    }
 
-       .multiboot.text : {
-           *(.multiboot.text)
-       }
-	_bootloader_end = .;
+    .text ALIGN(CONSTANT(MAXPAGESIZE)) : {
+        *(.text .text.*)
+    }
 
-	/* Add a symbol that indicates the start address of the kernel. */
-	.text ALIGN (4K) :
-	{
-		*(.text)
-	}
-	.rodata ALIGN (4K) :
-	{
-		*(.rodata)
-	}
-	.data ALIGN (4K) :
-	{
-		*(.data)
-	}
-	.bss ALIGN (4K):
-	{
-		*(COMMON)
-		*(.bss)
-		*(.bootstrap_stack)
-	}
-	/* Add a symbol that indicates the end address of the kernel. */
-	_kernel_end = .;
+    .data ALIGN(CONSTANT(MAXPAGESIZE)) : {
+        *(.data .data.*)
+
+        KEEP(*(.requests_start_marker))
+        KEEP(*(.requests))
+        KEEP(*(.requests_end_marker))
+    }
+
+    .dynamic : {
+        *(.dynamic)
+    }
+
+    .bss ALIGN(CONSTANT(MAXPAGESIZE)) : {
+        *(.bss .bss.*)
+        *(COMMON)
+    }
+
+    /DISCARD/ : {
+        *(.interp)
+    }
 }

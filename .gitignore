@@ -1,4 +1,7 @@
-*.o
-*.bin
+limine/
+obj/
+bin/
 *.iso
-isodir/
+*.o
+*.img
+*.bin
