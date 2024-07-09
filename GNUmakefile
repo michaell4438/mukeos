@@ -165,4 +165,4 @@ all: mukeos.iso
 # Remove object files and the final executable.
 .PHONY: clean
 clean:
-	rm -rf bin obj
+	rm -rf bin obj mukeos.iso

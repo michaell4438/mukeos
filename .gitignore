@@ -5,3 +5,8 @@ bin/
 *.o
 *.img
 *.bin
+*.zip
+*.tgz
+*.bz2
+bdf2c/
+uni_vga/
