@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <bootloader/limine.h>
+#include <screen/screen.hxx>
+#include <screen/font.h>
 
 __attribute__((used, section(".requests")))
 static volatile LIMINE_BASE_REVISION(2);
@@ -38,11 +40,8 @@ void _start(void) {
 
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
-    // Note: we assume the framebuffer model is RGB with 32-bit pixels.
-    for (size_t i = 0; i < 100; i++) {
-        volatile uint32_t *fb_ptr = static_cast<volatile uint32_t*>(framebuffer->address);
-        fb_ptr[i * (framebuffer->pitch / 4) + i] = 0xffffff;
-    }
+    Screen screen(framebuffer, font);
+    screen.print("Hello, World!");
 
     hcf();
 }

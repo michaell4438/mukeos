@@ -9,7 +9,7 @@
 
 class Screen {
     public:
-        Screen(limine_framebuffer buffer, struct bitmap_font font);
+        Screen(limine_framebuffer* buffer, struct bitmap_font font);
         void clear(uint32_t color);
         void clear();
         void put_char(char c, uint32_t color, size_t x, size_t y);
@@ -25,7 +25,7 @@ class Screen {
         size_t get_cursor_x();
         size_t get_cursor_y();
     private:
-        limine_framebuffer buffer;
+        limine_framebuffer* buffer;
         uint32_t default_color;
         size_t cursor_x;
         size_t cursor_y;
