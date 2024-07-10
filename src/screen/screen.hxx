@@ -13,22 +13,15 @@ class Screen {
         void clear(uint32_t color);
         void clear();
         void put_char(char c, uint32_t color, size_t x, size_t y);
+        void put_char(char c, uint32_t color, uint32_t bg_color, size_t x, size_t y);
         size_t put_string(const char* str, uint32_t color, size_t x, size_t y);
 
-        void set_default_color(uint32_t color);
-        uint32_t get_default_color();
+        size_t get_width();
+        size_t get_height();
 
-        void print(const char* str);
-        void print(const char* str, uint32_t color);
-
-        void set_cursor_pos(size_t x, size_t y);
-        size_t get_cursor_x();
-        size_t get_cursor_y();
+        volatile uint32_t* get_fb_ptr();
     private:
         limine_framebuffer* buffer;
-        uint32_t default_color;
-        size_t cursor_x;
-        size_t cursor_y;
         struct bitmap_font font;
 };
 

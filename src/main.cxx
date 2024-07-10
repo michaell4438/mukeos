@@ -4,6 +4,7 @@
 #include <bootloader/limine.h>
 #include <screen/screen.hxx>
 #include <screen/font.h>
+#include <screen/textdisplay.hxx>
 
 __attribute__((used, section(".requests")))
 static volatile LIMINE_BASE_REVISION(2);
@@ -41,7 +42,10 @@ void _start(void) {
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
     Screen screen(framebuffer, font);
-    screen.print("Hello, World!");
+    TextDisplay textdisplay(&screen, 8, 16);
+
+    textdisplay.clear();
+    textdisplay.print("Hello, World!");
 
     hcf();
 }

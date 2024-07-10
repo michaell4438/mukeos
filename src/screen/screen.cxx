@@ -2,9 +2,6 @@
 
 Screen::Screen(limine_framebuffer* buffer, struct bitmap_font font) {
     this->buffer = buffer;
-    this->default_color = 0xffffff;
-    this->cursor_x = 0;
-    this->cursor_y = 0;
     this->font = font;
 }
 
@@ -16,10 +13,14 @@ void Screen::clear(uint32_t color) {
 }
 
 void Screen::clear() {
-    this->clear(this->default_color);
+    clear(0);
 }
 
 void Screen::put_char(char c, uint32_t color, size_t x, size_t y) {
+    put_char(c, color, 0, x, y);
+}
+
+void Screen::put_char(char c, uint32_t color, uint32_t bg_color, size_t x, size_t y) {
     if (c < this->font.Chars) {
         const unsigned char *bitmap = this->font.Bitmap;
         const unsigned char *widths = this->font.Widths;
@@ -34,6 +35,12 @@ void Screen::put_char(char c, uint32_t color, size_t x, size_t y) {
                     size_t x_coord = x + j;
                     size_t screen_pos = y_coord*(this->buffer->pitch / 4) + x_coord;
                     fb_ptr[screen_pos] = color;
+                } else {
+                    volatile uint32_t *fb_ptr = static_cast<volatile uint32_t*>(this->buffer->address);
+                    size_t y_coord = y + i;
+                    size_t x_coord = x + j;
+                    size_t screen_pos = y_coord*(this->buffer->pitch / 4) + x_coord;
+                    fb_ptr[screen_pos] = bg_color;
                 }
             }
         }
@@ -58,31 +65,14 @@ size_t Screen::put_string(const char* str, uint32_t color, size_t x, size_t y) {
     return i;
 }
 
-void Screen::set_default_color(uint32_t color) {
-    this->default_color = color;
+size_t Screen::get_width() {
+    return this->buffer->width;
 }
 
-uint32_t Screen::get_default_color() {
-    return this->default_color;
+size_t Screen::get_height() {
+    return this->buffer->height;
 }
 
-void Screen::print(const char* str) {
-    this->cursor_x += this->put_string(str, this->default_color, this->cursor_x, this->cursor_y);
-}
-
-void Screen::print(const char* str, uint32_t color) {
-    this->cursor_x += this->put_string(str, color, this->cursor_x, this->cursor_y);
-}
-
-void Screen::set_cursor_pos(size_t x, size_t y) {
-    this->cursor_x = x;
-    this->cursor_y = y;
-}
-
-size_t Screen::get_cursor_x() {
-    return this->cursor_x;
-}
-
-size_t Screen::get_cursor_y() {
-    return this->cursor_y;
+volatile uint32_t* Screen::get_fb_ptr() {
+    return static_cast<volatile uint32_t*>(this->buffer->address);
 }
