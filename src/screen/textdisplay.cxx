@@ -104,3 +104,13 @@ void TextDisplay::scroll_up() {
         }
     }
 }
+
+uint32_t TextDisplay::get_color(uint8_t r, uint8_t g, uint8_t b) {
+    return (r << 16) | (g << 8) | b;
+}
+
+TextDisplay* textdisplay_instance;
+
+void set_textdisplay_instance(TextDisplay* instance) {
+    textdisplay_instance = instance;
+}

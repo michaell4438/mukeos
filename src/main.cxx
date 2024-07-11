@@ -5,6 +5,7 @@
 #include <screen/screen.hxx>
 #include <screen/font.h>
 #include <screen/textdisplay.hxx>
+#include <interrupts/interrupts.hxx>
 
 __attribute__((used, section(".requests")))
 static volatile LIMINE_BASE_REVISION(2);
@@ -44,8 +45,19 @@ void _start(void) {
     Screen screen(framebuffer, font);
     TextDisplay textdisplay(&screen, 8, 16);
 
-    textdisplay.clear();
-    textdisplay.print("Hello, World!");
+    set_textdisplay_instance(&textdisplay);
+
+    textdisplay_instance->clear();
+    textdisplay_instance->print("Hello, World!");
+
+    InterruptManager interrupts;
+    interrupts.init();
+
+    // intentionally cause a divide by zero exception
+    int a = 1;
+    int b = 0;
+    int c = a / b;
+    textdisplay_instance->clear(c);
 
     hcf();
 }

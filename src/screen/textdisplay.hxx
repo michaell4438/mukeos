@@ -39,6 +39,8 @@ class TextDisplay {
         void print(const char* str);
         void print(const char* str, uint32_t color, uint32_t bg_color);
 
+        uint32_t get_color(uint8_t r, uint8_t g, uint8_t b);
+
         void set_cursor_pos(size_t x, size_t y);
         size_t get_cursor_x();
         size_t get_cursor_y();
@@ -62,5 +64,10 @@ class TextDisplay {
 
         void put_char(char c, uint32_t color, uint32_t bg_color, size_t x, size_t y);
 };
+
+void set_textdisplay_instance(TextDisplay* instance);
+
+// declare a global instance of textdisplay
+extern TextDisplay* textdisplay_instance;
 
 #endif
