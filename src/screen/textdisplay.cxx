@@ -67,11 +67,21 @@ void TextDisplay::print(const char* str, uint32_t color, uint32_t bg_color) {
             }
         }
         put_char(str[i], color, bg_color, cursor_x, cursor_y);
-        cursor_x++;
-        i++;
     }
-    cursor_y++;
+}
+
+void TextDisplay::println(const char* str) {
+    println(str, default_color, default_bg_color);
+}
+
+void TextDisplay::println(const char* str, uint32_t color, uint32_t bg_color) {
+    print(str, color, bg_color);
     cursor_x = 0;
+    cursor_y++;
+    if (cursor_y >= screen_height) {
+        scroll_up();
+        cursor_y--;
+    }
 }
 
 void TextDisplay::set_cursor_pos(size_t x, size_t y) {
@@ -113,4 +123,31 @@ TextDisplay* textdisplay_instance;
 
 void set_textdisplay_instance(TextDisplay* instance) {
     textdisplay_instance = instance;
+}
+
+void TextDisplay::itoa(int n, char* str, int base) {
+    int i = 0;
+    bool is_negative = false;
+    if (n < 0) {
+        is_negative = true;
+        n = -n;
+    }
+    while (n) {
+        int rem = n % base;
+        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        n = n / base;
+    }
+    if (is_negative) {
+        str[i++] = '-';
+    }
+    str[i] = '\0';
+    int start = 0;
+    int end = i - 1;
+    while (start < end) {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
 }

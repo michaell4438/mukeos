@@ -28,15 +28,11 @@ struct idt_entry {
 class InterruptManager {
     public:
         void init();
-        void set_handler(uint8_t interrupt, void (*handler)(void));
-        void clear_handler(uint8_t interrupt);
     private:
-        void (*handlers[256])(void);
         idt_entry idt[256];
         idtr* idt_ptr;
-        void generate_idt();
-        void load_idt();
         void initialize_pic();
+        void init_idt_desc(uint16_t select, uint64_t offset, uint8_t type, uint8_t ist, idt_entry* desc);
 };
 
 #endif

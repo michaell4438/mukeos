@@ -38,6 +38,10 @@ class TextDisplay {
 
         void print(const char* str);
         void print(const char* str, uint32_t color, uint32_t bg_color);
+        void itoa(int n, char* str, int base);
+
+        void println(const char* str);
+        void println(const char* str, uint32_t color, uint32_t bg_color);
 
         uint32_t get_color(uint8_t r, uint8_t g, uint8_t b);
 
