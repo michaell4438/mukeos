@@ -28,7 +28,7 @@ _asm_int_handler_%1:
     mov al, 0x20
     out 0x20, al
     RESTORE_REGS
-    iret
+    iretq
 %endmacro
 
 extern isr_GP_exc, isr_PF_exc
@@ -41,18 +41,18 @@ _asm_syscalls:
     cli
     sti
     RESTORE_REGS
-    iret
+    iretq
 
 _asm_exc_GP:
     SAVE_REGS
     call isr_GP_exc
     RESTORE_REGS
     add esp, 4
-    iret
+    iretq
 
 _asm_exc_PF:
     SAVE_REGS
     call isr_PF_exc
     RESTORE_REGS
     add esp, 4
-    iret
+    iretq

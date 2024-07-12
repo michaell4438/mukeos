@@ -9,13 +9,12 @@
 #include <screen/textdisplay.hxx>
 #include <io.h>
 
-struct idtr {
+struct idtr64 {
     uint16_t limit;
     uint64_t base;
 } __attribute__((packed));
 
-
-struct idt_entry {
+struct idt_desc64 {
     uint16_t offset_low;
     uint16_t selector;
     uint8_t ist;
@@ -29,10 +28,9 @@ class InterruptManager {
     public:
         void init();
     private:
-        idt_entry idt[256];
-        idtr* idt_ptr;
-        void initialize_pic();
-        void init_idt_desc(uint16_t select, uint64_t offset, uint8_t type, uint8_t ist, idt_entry* desc);
+        idt_desc64 idt[256];
+        idtr64* idt_ptr;
+        void get_idt_desc64(uint64_t offset, uint16_t selector, uint8_t ist, uint8_t type_attr, idt_desc64* desc);
 };
 
 #endif
