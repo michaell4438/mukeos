@@ -1,7 +1,7 @@
 #ifndef IO_C
 #define IO_C
 #include <stdint.h>
-#include "io.h"
+#include <io.hxx>
 
 void outb(uint16_t port, uint8_t val) {
     asm volatile("outb %0, %1" : : "a" (val), "Nd" (port));

@@ -35,29 +35,27 @@ void _start(void) {
         hcf();
     }
 
-    if (framebuffer_request.response == NULL
-     || framebuffer_request.response->framebuffer_count < 1) {
-        hcf();
-    }
+    // if (framebuffer_request.response == NULL
+    //  || framebuffer_request.response->framebuffer_count < 1) {
+    //     hcf();
+    // }
 
-    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
+    // struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
-    Screen screen(framebuffer, font);
-    TextDisplay textdisplay(&screen, 8, 16);
+    // Screen screen(framebuffer, font);
+    // TextDisplay textdisplay(&screen, 8, 16);
 
-    set_textdisplay_instance(&textdisplay);
+    // set_textdisplay_instance(&textdisplay);
 
-    textdisplay_instance->clear();
-    textdisplay_instance->print("Hello, World!");
+    // textdisplay_instance->clear();
+    // textdisplay_instance->print("Hello, World!");
 
     InterruptManager interrupts;
     interrupts.init();
 
-    // intentionally cause a divide by zero exception
-    int a = 1;
-    int b = 0;
-    int c = a / b;
-    textdisplay_instance->clear(c);
+    // intentionally cause a page fault
+    asm volatile("movq $0x0, %rax");
+    asm volatile("movq (%rax), %rax");
 
     hcf();
 }
