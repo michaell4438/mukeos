@@ -57,11 +57,7 @@ struct PageMapLevel4 {
 
 class PageTableManager {
     public:
-        PageTableManager();
-        uint64_t alloc_frame();
-        void free_frame(uint64_t frame);
-    private:
-        PageMapLevel4* pml4;
+        PageTableManager(uint64_t hhdm_offset);
 
         PageDirectoryPointerTable* get_directory_pointer_table(uint64_t virtual_addr);
         PageDirectory* get_directory(uint64_t virtual_addr);
@@ -70,8 +66,12 @@ class PageTableManager {
 
         void map_page(uint64_t virtual_addr, uint64_t phys_addr, uint64_t flags);
         void map_range(uint64_t virtual_addr, uint64_t phys_addr, uint64_t size, uint64_t flags);
+        void unmap_page(uint64_t virtual_addr);
 
         void modify_page(uint64_t virtual_addr, uint64_t phys_addr, uint64_t flags);
+        void update_cr3();
+    private:
+        PageMapLevel4* pml4;
 };
 
 #endif

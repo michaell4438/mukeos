@@ -6,6 +6,8 @@
 #include <screen/font.h>
 #include <screen/textdisplay.hxx>
 #include <interrupts/interrupts.hxx>
+#include <memory/paging.hxx>
+#include <memory/pmm.hxx>
 
 __attribute__((used, section(".requests")))
 static volatile LIMINE_BASE_REVISION(2);
@@ -19,6 +21,18 @@ static volatile struct limine_framebuffer_request framebuffer_request = {
 __attribute__((used, section(".requests")))
 static volatile struct limine_kernel_address_request kernel_address_request = {
     .id = LIMINE_KERNEL_ADDRESS_REQUEST,
+    .revision = 0
+};
+
+__attribute__((used, section(".requests")))
+static volatile struct limine_hhdm_request hhdm_request = {
+    .id = LIMINE_HHDM_REQUEST,
+    .revision = 0
+};
+
+__attribute__((used, section(".requests")))
+static volatile struct limine_memmap_request memmap_request = {
+    .id = LIMINE_MEMMAP_REQUEST,
     .revision = 0
 };
 
@@ -59,9 +73,13 @@ void _start(void) {
     InterruptManager interrupts;
     interrupts.init();
 
-    // intentionally cause a page fault
-    asm volatile("movq $0x0, %rax");
-    asm volatile("movq (%rax), %rax");
+    uint64_t hhdm_offset = 0;
+    if (hhdm_request.response != NULL) {
+        hhdm_offset = hhdm_request.response->offset;
+    }
+
+    PhysicalMemoryManager pmm(memmap_request.response);
+    PageTableManager ptm(hhdm_offset);
 
     hcf();
 }
