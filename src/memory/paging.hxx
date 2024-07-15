@@ -4,17 +4,74 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-
-static inline uint64_t read_cr3(void);
+#include <bootloader/limine.h>
+#include <bootloader/constants.h>
 
 #define PTE_PRESENT (1 << 0)
 #define PTE_WRITE (1 << 1)
 #define PTE_USER (1 << 2)
+#define PTE_WRITE_THROUGH (1 << 3)
+#define PTE_CACHE_DISABLE (1 << 4)
+#define PTE_ACCESSED (1 << 5)
+#define PTE_DIRTY (1 << 6)
+#define PTE_HUGE_PAGE (1 << 7)
+#define PTE_GLOBAL (1 << 8)
+#define PTE_NO_EXECUTE (1 << 63)
 
-uint64_t* get_page_table_entry(uint64_t* base, uint64_t index);
+struct PageTableEntry {
+    uint64_t present : 1;
+    uint64_t write : 1;
+    uint64_t user : 1;
+    uint64_t write_through : 1;
+    uint64_t cache_disable : 1;
+    uint64_t accessed : 1;
+    uint64_t dirty : 1;
+    uint64_t huge_page : 1;
+    uint64_t global : 1;
+    uint64_t available : 3;
+    uint64_t address : 40;
+    uint64_t reserved : 11;
+    uint64_t no_execute : 1;
+} __attribute__((packed));
 
-uint64_t* get_page_table_entry(uint64_t* pml4_base, uint64_t vaddr);
+// define structs which contain the heirarchy of page tables
+// each struct contains 512 pointers to the next level of page tables
+// with the exception of the PageTable struct which contains 512 page table entries
+struct PageTable {
+    PageTableEntry entries[512];
+} __attribute__((packed));
 
-void modify_page_table_entry(uint64_t* pml4_base, uint64_t vaddr, uint64_t paddr, uint64_t flags);
+struct PageDirectory {
+    PageTable* tables[512];
+} __attribute__((packed));
+
+struct PageDirectoryPointerTable {
+    PageDirectory* directories[512];
+} __attribute__((packed));
+
+struct PageMapLevel4 {
+    PageDirectoryPointerTable* tables[512];
+} __attribute__((packed));
+
+#define FRAME_SIZE 4096
+
+class PageTableManager {
+    public:
+        PageTableManager();
+        uint64_t alloc_frame();
+        void free_frame(uint64_t frame);
+    private:
+        PageMapLevel4* pml4;
+
+        PageDirectoryPointerTable* get_directory_pointer_table(uint64_t virtual_addr);
+        PageDirectory* get_directory(uint64_t virtual_addr);
+        PageTable* get_table(uint64_t virtual_addr);
+        PageTableEntry* get_page(uint64_t virtual_addr);
+
+        void map_page(uint64_t virtual_addr, uint64_t phys_addr, uint64_t flags);
+        void map_range(uint64_t virtual_addr, uint64_t phys_addr, uint64_t size, uint64_t flags);
+
+        void modify_page(uint64_t virtual_addr, uint64_t phys_addr, uint64_t flags);
+};
 
 #endif
