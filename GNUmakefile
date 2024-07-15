@@ -156,7 +156,7 @@ run: mukeos.iso
 # Run the kernel in QEMU with GDB.
 .PHONY: debug
 debug: mukeos.iso
-	qemu-system-x86_64 -cdrom $< -s -S -nographic & \
+	qemu-system-x86_64 -cdrom $< -s -S & \
     gdb -ex "target remote localhost:1234" -ex "symbol-file bin/mukeos"
 
 # Default target.

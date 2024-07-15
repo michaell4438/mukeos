@@ -67,6 +67,8 @@ void TextDisplay::print(const char* str, uint32_t color, uint32_t bg_color) {
             }
         }
         put_char(str[i], color, bg_color, cursor_x, cursor_y);
+        i++;
+        cursor_x++;
     }
 }
 
