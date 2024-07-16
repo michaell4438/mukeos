@@ -17,8 +17,8 @@ PhysicalMemoryManager::PhysicalMemoryManager(limine_memmap_response* memmap_resp
     this->enable_reclaiming = false;
 
     for (size_t i = 0; i < memmap_response->entry_count; i++) {
-        limine_memmap_entry* entry = &memmap_response->entries[i];
-        add_entry(entry->base, entry->length, entry->type);
+        limine_memmap_entry* entry = memmap_response->entries[i];
+        add_entry(entry->base, entry->length, limine_type_to_pmm_type(entry->type));
     }
 
     // remove the first blank entry
@@ -126,3 +126,12 @@ void PhysicalMemoryManager::free(uint64_t addr) {
     }
 }
 
+
+uint8_t limine_type_to_pmm_type(uint8_t limine_type) {
+    switch (limine_type) {
+        case LIMINE_MEMMAP_USABLE:
+            return PMM_MEM_FREE;
+        default:
+            return PMM_MEM_RESERVED;
+    }
+}

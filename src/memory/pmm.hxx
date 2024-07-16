@@ -32,6 +32,8 @@ class PhysicalMemoryManager {
         uint64_t free_memory;
         bool enable_reclaiming;
 
+        uint8_t limine_type_to_pmm_type(uint8_t limine_type);
+
         void index_memory();
         void init();
 };
