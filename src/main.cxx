@@ -79,7 +79,9 @@ void _start(void) {
     }
 
     PhysicalMemoryManager pmm(memmap_request.response);
-    PageTableManager ptm(hhdm_offset);
+    PageTableManager ptm(hhdm_offset, &pmm);
+
+    uint64_t addr = pmm.alloc(4096);
 
     hcf();
 }

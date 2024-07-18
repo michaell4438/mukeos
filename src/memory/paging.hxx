@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <bootloader/limine.h>
 #include <bootloader/constants.h>
+#include <memory/pmm.hxx>
 
 #define PTE_PRESENT (1 << 0)
 #define PTE_WRITE (1 << 1)
@@ -57,7 +58,7 @@ struct PageMapLevel4 {
 
 class PageTableManager {
     public:
-        PageTableManager(uint64_t hhdm_offset);
+        PageTableManager(uint64_t hhdm_offset, PhysicalMemoryManager* pmm);
 
         PageDirectoryPointerTable* get_directory_pointer_table(uint64_t virtual_addr);
         PageDirectory* get_directory(uint64_t virtual_addr);
@@ -68,10 +69,12 @@ class PageTableManager {
         void map_range(uint64_t virtual_addr, uint64_t phys_addr, uint64_t size, uint64_t flags);
         void unmap_page(uint64_t virtual_addr);
 
-        void modify_page(uint64_t virtual_addr, uint64_t phys_addr, uint64_t flags);
+        void modify_page(uint64_t virtual_addr, uint64_t phys_addr, uint64_t flags, bool flush_tlb = true);
         void update_cr3();
     private:
         PageMapLevel4* pml4;
+        PhysicalMemoryManager* pmm;
+        uint64_t hhdm_offset;
 };
 
 #endif

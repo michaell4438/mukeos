@@ -58,6 +58,14 @@ void PhysicalMemoryManager::add_entry(uint64_t base, uint64_t length, uint8_t ty
     }
 }
 
+uint64_t PhysicalMemoryManager::alloc(uint64_t bytes) {
+    return alloc(bytes, PMM_MEM_ALLOCATED);
+}
+
+uint64_t PhysicalMemoryManager::alloc(uint64_t bytes, uint8_t type) {
+    return alloc(&bytes, type);
+}
+
 uint64_t PhysicalMemoryManager::alloc(uint64_t* bytes, uint8_t type) {
     // parse the linked list to find a free block of memory which is large enough
     // if enable_reclaiming is true, we can reclaim memory from allocated blocks
@@ -127,7 +135,7 @@ void PhysicalMemoryManager::free(uint64_t addr) {
 }
 
 
-uint8_t limine_type_to_pmm_type(uint8_t limine_type) {
+uint8_t PhysicalMemoryManager::limine_type_to_pmm_type(uint8_t limine_type) {
     switch (limine_type) {
         case LIMINE_MEMMAP_USABLE:
             return PMM_MEM_FREE;

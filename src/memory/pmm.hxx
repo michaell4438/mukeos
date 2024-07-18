@@ -22,6 +22,8 @@ class PhysicalMemoryManager {
     public:
         PhysicalMemoryManager(struct PhysicalMemoryMap* mmap);
         PhysicalMemoryManager(limine_memmap_response* memmap_response);
+        uint64_t alloc(uint64_t bytes);
+        uint64_t alloc(uint64_t bytes, uint8_t type);
         uint64_t alloc(uint64_t* bytes, uint8_t type);
         void free(uint64_t addr);
         void set_reclaiming(bool reclaiming);
