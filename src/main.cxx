@@ -8,6 +8,7 @@
 #include <interrupts/interrupts.hxx>
 #include <memory/paging.hxx>
 #include <memory/pmm.hxx>
+#include <memory/pfa.hxx>
 
 __attribute__((used, section(".requests")))
 static volatile LIMINE_BASE_REVISION(2);
@@ -68,7 +69,7 @@ void _start(void) {
     set_textdisplay_instance(&textdisplay);
 
     textdisplay_instance->clear();
-    textdisplay_instance->print("Hello, World!");
+    textdisplay_instance->println("Hello, World!");
 
     InterruptManager interrupts;
     interrupts.init();
@@ -78,10 +79,22 @@ void _start(void) {
         hhdm_offset = hhdm_request.response->offset;
     }
 
-    PhysicalMemoryManager pmm(memmap_request.response);
+    PhysicalMemoryManager pmm(memmap_request.response, hhdm_offset);
     PageTableManager ptm(hhdm_offset, &pmm);
 
     uint64_t addr = pmm.alloc(4096);
+
+    textdisplay_instance->print(addr, 16, "0x");
+    textdisplay_instance->println("");
+
+    pmm.free(addr);
+
+    PageFrameAllocator pfa(&pmm, &ptm, kernel_end, 0xFFFFFFFFFFFFFFFF);
+
+    addr = pfa.alloc(1);
+
+    textdisplay_instance->print(addr, 16, "0x");
+    textdisplay_instance->println("");
 
     hcf();
 }

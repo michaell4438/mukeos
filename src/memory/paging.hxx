@@ -71,6 +71,8 @@ class PageTableManager {
 
         void modify_page(uint64_t virtual_addr, uint64_t phys_addr, uint64_t flags, bool flush_tlb = true);
         void update_cr3();
+
+        uint64_t get_hhdm_offset();
     private:
         PageMapLevel4* pml4;
         PhysicalMemoryManager* pmm;

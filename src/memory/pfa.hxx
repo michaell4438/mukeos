@@ -10,7 +10,7 @@
 
 class PageFrameAllocator {
     public:
-        void init(PhysicalMemoryManager* pmm, PageTableManager* ptm, uint64_t region_start, uint64_t region_end);
+        PageFrameAllocator(PhysicalMemoryManager* pmm, PageTableManager* ptm, uint64_t region_start, uint64_t region_end);
         uint64_t alloc(uint16_t count, bool phys = true, bool write = true, bool user = false, bool exec = false);
         void free(uint64_t addr, uint16_t count);
     private:

@@ -1,145 +1,106 @@
 #include <memory/pmm.hxx>
 
-PhysicalMemoryManager::PhysicalMemoryManager(struct PhysicalMemoryMap* mmap) {
-    this->mmap = mmap;
+PhysicalMemoryManager::PhysicalMemoryManager(limine_memmap_response* memmap_response, uint64_t hhdm_offset) {
     this->memory_size = 0;
     this->free_memory = 0;
-    this->enable_reclaiming = false;
 
-    init();
-}
-
-PhysicalMemoryManager::PhysicalMemoryManager(limine_memmap_response* memmap_response) {
-    PhysicalMemoryMap blank = {0, 0, 0, nullptr};
-    this->mmap = &blank;
-    this->memory_size = 0;
-    this->free_memory = 0;
-    this->enable_reclaiming = false;
-
-    for (size_t i = 0; i < memmap_response->entry_count; i++) {
+    for (int i = 0; i < memmap_response->entry_count - 1; i++) {
         limine_memmap_entry* entry = memmap_response->entries[i];
-        add_entry(entry->base, entry->length, limine_type_to_pmm_type(entry->type));
-    }
-
-    // remove the first blank entry
-    mmap = mmap->next;
-
-    init();
-}
-
-void PhysicalMemoryManager::index_memory() {
-    while (mmap != nullptr) {
-        memory_size += mmap->length;
-        if (mmap->type == PMM_MEM_FREE) {
-            free_memory += mmap->length;
+        if (entry->type == LIMINE_MEMMAP_USABLE) {
+            free_memory += entry->length;
         }
-        mmap = mmap->next;
+        memory_size += entry->length;
     }
-}
 
-void PhysicalMemoryManager::init() {
-    index_memory();
-}
+    bitmap_size = memory_size / 0x1000 / 8;
+    bitmap_size += 1;
+    uint64_t phys_bitmap_addr = 0xFFFFFFFFFFFFFFFF;
+    uint64_t bitmap_addr = 0xFFFFFFFFFFFFFFFF;
 
-void PhysicalMemoryManager::set_reclaiming(bool reclaiming) {
-    enable_reclaiming = reclaiming;
-}
+    // find the first free memory region big enough to store the bitmap
+    for (int i = 0; i < memmap_response->entry_count; i++) {
+        limine_memmap_entry* entry = memmap_response->entries[i];
+        if (entry->type == LIMINE_MEMMAP_USABLE && entry->length >= bitmap_size) {
+            phys_bitmap_addr = entry->base;
+            bitmap_addr = phys_bitmap_addr + hhdm_offset;
+            bitmap = (uint8_t*)bitmap_addr;
+            break;
+        }
+    }
 
-void PhysicalMemoryManager::add_entry(uint64_t base, uint64_t length, uint8_t type) {
-    struct PhysicalMemoryMap* entry = (struct PhysicalMemoryMap*)base;
-    entry->base = base;
-    entry->length = length;
-    entry->type = type;
-    entry->next = mmap;
-    mmap = entry;
-    memory_size += length;
-    if (type == PMM_MEM_FREE) {
-        free_memory += length;
+    if (bitmap_addr == 0xFFFFFFFFFFFFFFFF) {
+        // throw a page fault
+        // TODO: create custom handler for this
+        asm volatile("int $14");
+    }
+
+    // go through each memory region and set the bits in the bitmap
+    for (int i = 0; i < memmap_response->entry_count; i++) {
+        limine_memmap_entry* entry = memmap_response->entries[i];
+        if (entry->type == LIMINE_MEMMAP_USABLE) {
+            for (uint64_t j = 0; j < entry->length / 0x1000; j++) {
+                clear_bitmap_bit(entry->base / 0x1000 + j);
+            }
+        } else {
+            for (uint64_t j = 0; j < entry->length / 0x1000; j++) {
+                set_bitmap_bit(entry->base / 0x1000 + j);
+            }
+        }
+    }
+
+    // set the bits for the bitmap itself
+    for (uint64_t i = phys_bitmap_addr; i < phys_bitmap_addr + bitmap_size; i += 0x1000) {
+        set_bitmap_bit(i / 0x1000);
     }
 }
 
 uint64_t PhysicalMemoryManager::alloc(uint64_t bytes) {
-    return alloc(bytes, PMM_MEM_ALLOCATED);
-}
+    uint64_t best_addr = 0xFFFFFFFFFFFFFFFF;
+    uint64_t best_size = 0xFFFFFFFFFFFFFFFF;
 
-uint64_t PhysicalMemoryManager::alloc(uint64_t bytes, uint8_t type) {
-    return alloc(&bytes, type);
-}
-
-uint64_t PhysicalMemoryManager::alloc(uint64_t* bytes, uint8_t type) {
-    // parse the linked list to find a free block of memory which is large enough
-    // if enable_reclaiming is true, we can reclaim memory from allocated blocks
-    // if the free space next to the desired region is < 4k, do not split (this will prevent fragmentation)
-    // search through the entire memory map to find an exact match
-    // if no exact match is found, split the largest block and return the address
-    // if no matches are found, return 0
-    // the value of bytes will be updated to the actual size of the block allocated
-
-    struct PhysicalMemoryMap* entry = mmap;
-    struct PhysicalMemoryMap* largest = nullptr;
-
-    while (entry != nullptr) {
-        if (entry->type == PMM_MEM_FREE && *bytes <= entry->length) {
-            if (entry->length > largest->length) {
-                largest = entry;
-            }
-
-            if (entry->length == *bytes) {
-                entry->type = PMM_MEM_ALLOCATED;
-                *bytes = entry->length;
-                free_memory -= entry->length;
-                return entry->base;
-            }
+    // find the smallest free memory region that can fit the requested size
+    for (uint64_t i = 0; i < bitmap_size * 8; i++) {
+        if (get_bitmap_bit(i)) {
+            continue;
         }
-        entry = entry->next;
-    }
 
-    if (largest != nullptr) {
-        if (largest->length - *bytes < 4096) {
-            largest->type = PMM_MEM_ALLOCATED;
-            free_memory -= largest->length;
-            *bytes = largest->length;
-            return largest->base;
-        } else {
-            struct PhysicalMemoryMap* new_entry = (struct PhysicalMemoryMap*)largest->base + *bytes;
-            new_entry->base = largest->base + *bytes;
-            new_entry->length = largest->length - *bytes;
-            new_entry->type = PMM_MEM_FREE;
-            new_entry->next = largest->next;
-            largest->length = *bytes;
-            largest->type = PMM_MEM_ALLOCATED;
-            largest->next = new_entry;
-            free_memory -= *bytes;
-            return largest->base;
+        uint64_t j = i;
+        while (j < bitmap_size && !get_bitmap_bit(j)) {
+            j++;
+        }
+
+        if (j - i < best_size && j - i >= bytes / 0x1000) {
+            best_size = j - i;
+            best_addr = i;
         }
     }
 
-    return 0;
+    if (best_addr == 0xFFFFFFFFFFFFFFFF) {
+        // throw a page fault
+        asm volatile("int $14");
+    }
+
+    for (uint64_t i = best_addr; i < best_addr + bytes / 0x1000; i++) {
+        set_bitmap_bit(i);
+    }
+
+    return best_addr * 0x1000;
 }
 
 void PhysicalMemoryManager::free(uint64_t addr) {
-    struct PhysicalMemoryMap* entry = mmap;
-    struct PhysicalMemoryMap* left = nullptr;
-    struct PhysicalMemoryMap* right = entry->next;
-
-    while (entry != nullptr) {
-        if (entry->base <= addr && entry->base + entry->length > addr) {
-            if (entry->type == PMM_MEM_ALLOCATED || (entry->type == PMM_MEM_RECLAIMABLE && enable_reclaiming)) {
-                entry->type = PMM_MEM_FREE;
-                free_memory += entry->length;
-            } else {
-                return;
-            }
-        }
+    for (uint64_t i = addr / 0x1000; i < (addr + 0x1000) / 0x1000; i++) {
+        clear_bitmap_bit(i);
     }
 }
 
+void PhysicalMemoryManager::set_bitmap_bit(uint64_t bit) {
+    bitmap[bit / 8] |= (1 << (bit % 8));
+}
 
-uint8_t PhysicalMemoryManager::limine_type_to_pmm_type(uint8_t limine_type) {
-    switch (limine_type) {
-        case LIMINE_MEMMAP_USABLE:
-            return PMM_MEM_FREE;
-        default:
-            return PMM_MEM_RESERVED;
-    }
+void PhysicalMemoryManager::clear_bitmap_bit(uint64_t bit) {
+    bitmap[bit / 8] &= ~(1 << (bit % 8));
+}
+
+bool PhysicalMemoryManager::get_bitmap_bit(uint64_t bit) {
+    return bitmap[bit / 8] & (1 << (bit % 8));
 }

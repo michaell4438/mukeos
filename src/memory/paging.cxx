@@ -124,4 +124,6 @@ void PageTableManager::update_cr3() {
     asm volatile("mov %0, %%cr3" : : "r"(pml4) : "memory");
 }
 
-
+uint64_t PageTableManager::get_hhdm_offset() {
+    return hhdm_offset;
+}

@@ -153,3 +153,10 @@ void TextDisplay::itoa(int n, char* str, int base) {
         end--;
     }
 }
+
+void TextDisplay::print(uint64_t n, int base, const char* prefix) {
+    char str[23];
+    itoa(n, str, base);
+    print(prefix);
+    print(str);
+}

@@ -1,12 +1,12 @@
 #include <memory/pfa.hxx>
 
-void PageFrameAllocator::init(PhysicalMemoryManager* pmm, PageTableManager* ptm, uint64_t region_start, uint64_t region_end) {
+PageFrameAllocator::PageFrameAllocator(PhysicalMemoryManager* pmm, PageTableManager* ptm, uint64_t region_start, uint64_t region_end) {
     this->pmm = pmm;
     this->ptm = ptm;
     this->region_start = region_start;
     this->region_end = region_end;
     bitmap_size = (region_end - region_start) / 4096 / 8 + 1;
-    uint64_t bitmap_location = pmm->alloc(bitmap_size);
+    uint64_t bitmap_location = pmm->alloc(bitmap_size) + ptm->get_hhdm_offset();
     bitmap = (uint8_t*)bitmap_location;
     for (int i = 0; i < bitmap_size; i++) {
         bitmap[i] = 0;
